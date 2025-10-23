@@ -5,4 +5,6 @@ module com.example.sudokusolver {
 
     opens com.example.sudokusolver to javafx.fxml;
     exports com.example.sudokusolver;
+    exports com.example.sudokusolver.model;
+    opens com.example.sudokusolver.model to javafx.fxml;
 }
