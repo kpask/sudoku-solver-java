@@ -199,7 +199,6 @@ public class SudokuBoard {
         // Box-line reduce until nothing changes
         boolean hasChanged = true;
         while(hasChanged){
-            System.out.println(board[4][0].getCandidates() + " goo");
             hasChanged = false;
             if(boxLineReduction()) hasChanged = true;
             if(fillSingleCandidate()) hasChanged = true;
