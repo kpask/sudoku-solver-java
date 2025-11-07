@@ -1,6 +1,7 @@
 package com.example.sudokusolver.model;
 
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -13,6 +14,7 @@ public class SudokuTest {
 
     public static void testAll(String filename){
         List<SudokuPuzzle> puzzles = null;
+        List<SudokuPuzzle> unsolvedPuzzles = new ArrayList<>();
         try{
             puzzles = SudokuLoader.loadAllFromFile("medium.txt");
         } catch (FileNotFoundException er)
@@ -27,8 +29,13 @@ public class SudokuTest {
         for(SudokuPuzzle puzzle : puzzles){
             SudokuBoard board = new SudokuBoard(puzzle.board);
             board.solve();
-            if(board.isSolved()) solvedCount++;
-            System.out.println(solvedCount);
+            if(board.isSolved()){
+                solvedCount++;
+                System.out.println(solvedCount);
+            }
+            else{
+                unsolvedPuzzles.add(puzzle);
+            }
         }
 
         System.out.printf("Puzzles in file: %d  Solved: %.2f%%%n", puzzleCount, ((double) solvedCount / puzzleCount) * 100);
