@@ -80,6 +80,75 @@ public class SudokuBoard {
         return hasChanged;
     }
 
+    private boolean processNakedPairsUnit(List<SudokuCell> unit) {
+        boolean hasChanged = false;
+
+        for (int i = 0; i < unit.size(); i++) {
+            Set<Integer> candidates1 = unit.get(i).getCandidates();
+
+            if (candidates1.size() == 2) {
+                for (int j = i + 1; j < unit.size(); j++) {
+                    Set<Integer> candidates2 = unit.get(j).getCandidates();
+
+                    if (candidates2.equals(candidates1)) {
+                        // Remove these candidates from all other cells in the unit
+                        for (int k = 0; k < unit.size(); k++) {
+                            if (k != i && k != j) {
+                                for (int value : candidates1) {
+                                    if (unit.get(k).removeCandidate(value)) {
+                                        hasChanged = true;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return hasChanged;
+    }
+
+
+    public boolean nakedPairs() {
+        boolean hasChanged = false;
+
+        // Process rows
+        for (int row = 0; row < 9; row++) {
+            List<SudokuCell> rowCells = new ArrayList<>();
+            for (int col = 0; col < 9; col++) {
+                rowCells.add(board[row][col]);
+            }
+            if (processNakedPairsUnit(rowCells)) hasChanged = true;
+        }
+
+        // Process columns
+        for (int col = 0; col < 9; col++) {
+            List<SudokuCell> colCells = new ArrayList<>();
+            for (int row = 0; row < 9; row++) {
+                colCells.add(board[row][col]);
+            }
+            if (processNakedPairsUnit(colCells)) hasChanged = true;
+        }
+
+        // Process 3x3 blocks
+        for (int blockRow = 0; blockRow < 3; blockRow++) {
+            for (int blockCol = 0; blockCol < 3; blockCol++) {
+                List<SudokuCell> blockCells = new ArrayList<>();
+                for (int r = blockRow * 3; r < blockRow * 3 + 3; r++) {
+                    for (int c = blockCol * 3; c < blockCol * 3 + 3; c++) {
+                        blockCells.add(board[r][c]);
+                    }
+                }
+                if (processNakedPairsUnit(blockCells)) hasChanged = true;
+            }
+        }
+
+        removeInvalidCandidates();
+        return hasChanged;
+    }
+
+
     public boolean fillHiddenRowColumnSingles() {
         Map<Integer, Integer>[] rowCandidates = new Map[9];
         Map<Integer, Integer>[] colCandidates = new Map[9];
@@ -256,8 +325,6 @@ public class SudokuBoard {
             if (!(a || b)) break;
         }
 
-
-        // Box-line reduce until nothing changes
         boolean hasChanged = true;
         while (hasChanged) {
             hasChanged = false;
@@ -267,7 +334,7 @@ public class SudokuBoard {
             if (updateBoxCandidates()) hasChanged = true;
             boolean changed;
             do {
-                changed = fillHiddenRowColumnSingles();
+                changed = fillHiddenRowColumnSingles() | nakedPairs();
                 if (changed) hasChanged = true;
             } while (changed);
         }
