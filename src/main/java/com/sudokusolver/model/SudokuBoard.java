@@ -1,4 +1,4 @@
-package com.example.sudokusolver.model;
+package com.sudokusolver.model;
 
 import java.util.*;
 
@@ -312,7 +312,6 @@ public class SudokuBoard {
             }
             return hasChanged;
         }
-
 
         public int getCellValue ( int row, int column){
             return board[row][column].getCell();

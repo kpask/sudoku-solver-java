@@ -1,4 +1,4 @@
-package com.example.sudokusolver.model;
+package com.sudokusolver.model;
 
 public class SudokuPuzzle {
     public final String id;

@@ -1,9 +1,12 @@
-package com.example.sudokusolver.model;
+package com.sudokusolver.testing;
+
+import com.sudokusolver.logic.SudokuLoader;
+import com.sudokusolver.model.SudokuBoard;
+import com.sudokusolver.model.SudokuPuzzle;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 
 public class SudokuTest {

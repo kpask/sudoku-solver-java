@@ -1,4 +1,6 @@
-package com.example.sudokusolver.model;
+package com.sudokusolver.logic;
+
+import com.sudokusolver.model.SudokuPuzzle;
 
 import java.io.File;
 import java.io.FileNotFoundException;

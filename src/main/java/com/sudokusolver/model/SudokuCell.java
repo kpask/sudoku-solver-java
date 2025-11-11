@@ -1,4 +1,4 @@
-package com.example.sudokusolver.model;
+package com.sudokusolver.model;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -28,8 +28,11 @@ public class SudokuCell {
     public void addCandidate(int value){
         if(value > 0 && value <= 9) candidates.add(value);
     }
-    public void removeCandidate(int value) {
-        if (value < 1 || value > 9) return;
-        candidates.remove(value);
+    public boolean removeCandidate(int value) {
+        if(value > 0 && value <= 9 && candidates.contains(value)){
+            candidates.remove(value);
+            return true;
+        }
+        return false;
     }
 }

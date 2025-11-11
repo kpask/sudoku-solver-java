@@ -1,10 +1,5 @@
-module com.example.sudokusolver {
-    requires javafx.controls;
-    requires javafx.fxml;
-
-
-    opens com.example.sudokusolver to javafx.fxml;
-    exports com.example.sudokusolver;
-    exports com.example.sudokusolver.model;
-    opens com.example.sudokusolver.model to javafx.fxml;
+module com.sudokusolver {
+    exports com.sudokusolver.model;
+    exports com.sudokusolver.logic;
+    exports com.sudokusolver.testing;
 }
