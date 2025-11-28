@@ -3,12 +3,13 @@ package com.sudokusolver.model;
 import java.util.*;
 
 public class SudokuBoard {
-    private SudokuCell[][] board = new SudokuCell[9][9];
-    private Set<Integer>[] rows = new HashSet[9];
-    private Set<Integer>[] columns = new HashSet[9];
-    private Set<Integer>[] boxes = new HashSet[9];
-    private Map<Integer, Integer>[] boxCandidateCount = new Map[9];
+    private final SudokuCell[][] board = new SudokuCell[9][9];
+    private final HashSet<Integer>[] rows = new HashSet[9];
+    private final HashSet<Integer>[] columns = new HashSet[9];
+    private final HashSet<Integer>[] boxes = new HashSet[9];
+    private final HashMap<Integer, Integer>[] boxCandidateCount = new HashMap[9];
 
+    private final int[][] boxIndex = new int[9][9];
     public SudokuBoard(int[][] grid) {
         // initialize sets
         for (int i = 0; i < 9; i++) {
@@ -21,11 +22,12 @@ public class SudokuBoard {
         //Initialize cells for each grid part
         for (int i = 0; i < 9; ++i) {
             for (int j = 0; j < 9; ++j) {
+                boxIndex[i][j] = (i / 3) * 3 + (j / 3);
                 board[i][j] = new SudokuCell(grid[i][j]);
                 if (grid[i][j] != 0) {
                     columns[j].add(grid[i][j]);
                     rows[i].add(grid[i][j]);
-                    boxes[getBoxIndex(i, j)].add(grid[i][j]);
+                    boxes[boxIndex[i][j]].add(grid[i][j]);
                 }
             }
         }
@@ -38,7 +40,7 @@ public class SudokuBoard {
                 SudokuCell cell = board[row][col];
                 if (cell.getCell() == 0) {
                     for (int n = 1; n <= 9; ++n) {
-                        if (cell.getCandidates().contains(n) && (columns[col].contains(n) || rows[row].contains(n) || boxes[getBoxIndex(row, col)].contains(n))) {
+                        if (cell.getCandidates().contains(n) && (columns[col].contains(n) || rows[row].contains(n) || boxes[boxIndex[row][col]].contains(n))) {
                             anyChange = true;
                             cell.removeCandidate(n);
                         }
@@ -53,7 +55,7 @@ public class SudokuBoard {
     // Clears candidate count for each box, updating the occurrences of each candidate [1-9] in the box
     public boolean updateBoxCandidates() {
         boolean hasChanged = false;
-        Map<Integer, Integer>[] boxCopy = new Map[9];
+        HashMap<Integer, Integer>[] boxCopy = new HashMap[9];
         for (int i = 0; i < 9; ++i) {
             boxCopy[i] = new HashMap<>(boxCandidateCount[i]);
             boxCandidateCount[i].clear();
@@ -63,9 +65,9 @@ public class SudokuBoard {
             for (int col = 0; col < 9; ++col) {
                 Set<Integer> cellCandidates = board[row][col].getCandidates();
                 for (int n = 1; n <= 9; ++n) {
-                    int boxIndex = getBoxIndex(row, col);
+                    int box = boxIndex[row][col];
                     if (cellCandidates.contains(n)) {
-                        boxCandidateCount[boxIndex].put(n, boxCandidateCount[boxIndex].getOrDefault(n, 0) + 1);
+                        boxCandidateCount[box].put(n, boxCandidateCount[box].getOrDefault(n, 0) + 1);
                     }
                 }
             }
@@ -181,7 +183,7 @@ public class SudokuBoard {
                             board[row][col].setCell(candidate);
                             rows[row].add(candidate);
                             columns[col].add(candidate);
-                            boxes[getBoxIndex(row, col)].add(candidate);
+                            boxes[boxIndex[row][col]].add(candidate);
                             hasChanged = true;
                             break;
                         }
@@ -198,7 +200,7 @@ public class SudokuBoard {
                             board[row][col].setCell(candidate);
                             rows[row].add(candidate);
                             columns[col].add(candidate);
-                            boxes[getBoxIndex(row, col)].add(candidate);
+                            boxes[boxIndex[row][col]].add(candidate);
                             hasChanged = true;
                             break;
                         }
@@ -221,16 +223,16 @@ public class SudokuBoard {
                     cell.setCell(value);
                     columns[col].add(value);
                     rows[row].add(value);
-                    boxes[getBoxIndex(row, col)].add(value);
+                    boxes[boxIndex[row][col]].add(value);
                     anyChange = true;
                 }
             }
         }
         // Fill single candidates of boxes
-        for (int boxIndex = 0; boxIndex < 9; ++boxIndex) {
+        for (int box = 0; box < 9; ++box) {
             for (int candidate = 1; candidate <= 9; ++candidate) {
-                if (boxCandidateCount[boxIndex].getOrDefault(candidate, 0) == 1) {
-                    int[] boxStartPos = getFirstCellPosition(boxIndex);
+                if (boxCandidateCount[box].getOrDefault(candidate, 0) == 1) {
+                    int[] boxStartPos = getFirstCellPosition(box);
                     int startX = boxStartPos[0];
                     int startY = boxStartPos[1];
                     for (int row = startX; row < startX + 3; ++row) {
@@ -240,7 +242,7 @@ public class SudokuBoard {
                                 cell.setCell(candidate);
                                 columns[col].add(candidate);
                                 rows[row].add(candidate);
-                                boxes[getBoxIndex(row, col)].add(candidate);
+                                boxes[boxIndex[row][col]].add(candidate);
                                 anyChange = true;
                             }
                         }
@@ -342,10 +344,10 @@ public class SudokuBoard {
 
     public boolean boxLineReduction() {
         boolean hasChanged = false;
-        for (int boxIndex = 0; boxIndex < 9; ++boxIndex) {
+        for (int box = 0; box < 9; ++box) {
             // Iterate through the possible values [1-9]
             for (int candidate = 1; candidate <= 9; candidate++) {
-                int[] result = straightLineCandidatesInBox(boxIndex, candidate);
+                int[] result = straightLineCandidatesInBox(box, candidate);
                 if (result == null) continue;
 
                 int type = result[0];
@@ -356,7 +358,7 @@ public class SudokuBoard {
                     //Iterate through the board rows cells where two in a row was found with j value
                     for (int col = 0; col < 9; ++col) {
                         //If we are not standing in the same box as where j was found in the row, eliminate j value
-                        if (getBoxIndex(globalIndex, col) != boxIndex && board[globalIndex][col].getCandidates().contains(candidate)) {
+                        if (boxIndex[globalIndex][col] != box && board[globalIndex][col].getCandidates().contains(candidate)) {
                             board[globalIndex][col].removeCandidate(candidate);
                             hasChanged = true;
                         }
@@ -367,7 +369,7 @@ public class SudokuBoard {
                     // Iterate through the board column cells where two in a row was found
                     for (int row = 0; row < 9; ++row) {
                         // If the cell is not in the same box as where j was found, remove j from the candidate in the column
-                        if (getBoxIndex(row, globalIndex) != boxIndex && board[row][globalIndex].getCandidates().contains(candidate)) {
+                        if (boxIndex[row][globalIndex] != box && board[row][globalIndex].getCandidates().contains(candidate)) {
                             board[row][globalIndex].removeCandidate(candidate);
                             hasChanged = true;
                         }
@@ -390,10 +392,6 @@ public class SudokuBoard {
 
     public Set<Integer> getCandidates(int row, int column) {
         return board[row][column].getCandidates();
-    }
-
-    public static int getBoxIndex(int row, int col) {
-        return (row / 3) * 3 + (col / 3);
     }
 
     public String getBoxes(int num) {

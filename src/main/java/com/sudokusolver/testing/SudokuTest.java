@@ -14,10 +14,10 @@ public class SudokuTest {
         testAll("medium.txt");
     }
 
-
     public static void testAll(String filename){
         List<SudokuPuzzle> puzzles = null;
         List<SudokuPuzzle> unsolvedPuzzles = new ArrayList<>();
+
         try{
             puzzles = SudokuLoader.loadAllFromFile("medium.txt");
         } catch (FileNotFoundException er)
@@ -27,8 +27,9 @@ public class SudokuTest {
 
         assert puzzles != null;
         int puzzleCount = puzzles.size();
-
         int solvedCount = 0;
+
+        long startTime = System.nanoTime();
         for(SudokuPuzzle puzzle : puzzles){
             SudokuBoard board = new SudokuBoard(puzzle.board);
             board.solve();
@@ -36,11 +37,12 @@ public class SudokuTest {
                 solvedCount++;
                 System.out.println(solvedCount);
             }
-            else{
-                unsolvedPuzzles.add(puzzle);
-            }
         }
+        long endTime = System.nanoTime();
+        long elapsedNs = endTime - startTime;
+        double elapsedMs = elapsedNs / 1_000_000.0;
 
-        System.out.printf("Puzzles in file: %d  Solved: %.2f%%%n", puzzleCount, ((double) solvedCount / puzzleCount) * 100);
+        System.out.printf("Puzzles in file (%s): %d  Solved: %.2f%%%n", filename, puzzleCount, ((double) solvedCount / puzzleCount) * 100);
+        System.out.printf("Time elapsed: %.3f ms\n", elapsedMs);
     }
 }
