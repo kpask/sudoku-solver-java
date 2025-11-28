@@ -11,23 +11,20 @@ import java.util.List;
 
 public class SudokuTest {
     public static void main(String[] args) throws FileNotFoundException {
-        testAll("medium.txt");
-    }
-
-    public static void testAll(String filename){
+        String filename = "easy.txt";
         List<SudokuPuzzle> puzzles = null;
         List<SudokuPuzzle> unsolvedPuzzles = new ArrayList<>();
 
         try{
-            puzzles = SudokuLoader.loadAllFromFile("medium.txt");
+            puzzles = SudokuLoader.load(filename);
         } catch (FileNotFoundException er)
         {
-            System.out.println("File not found");
+            System.out.printf("File %s not found\n", filename);
+            return;
         }
 
-        assert puzzles != null;
-        int puzzleCount = puzzles.size();
         int solvedCount = 0;
+        int puzzleCount = puzzles.size();
 
         long startTime = System.nanoTime();
         for(SudokuPuzzle puzzle : puzzles){
@@ -42,7 +39,7 @@ public class SudokuTest {
         long elapsedNs = endTime - startTime;
         double elapsedMs = elapsedNs / 1_000_000.0;
 
-        System.out.printf("Puzzles in file (%s): %d  Solved: %.2f%%%n", filename, puzzleCount, ((double) solvedCount / puzzleCount) * 100);
+        System.out.printf("Puzzles in file (%s): %d  Solved: %.2f%%%n", filename, puzzleCount, ((double) solvedCount / puzzles.size()) * 100);
         System.out.printf("Time elapsed: %.3f ms\n", elapsedMs);
     }
 }
